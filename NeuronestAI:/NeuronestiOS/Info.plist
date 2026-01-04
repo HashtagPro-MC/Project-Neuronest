@@ -18,14 +18,14 @@
 		</dict>
 	</array>
 	<key>COHERE_API_KEY</key>
-	<string>Onj9lmoyc2NhRqS9nLeNDFGoDF7dfatJ0GnMN4Ln</string>
+	<string>PUT_UR_COHERE_API_KEY_IN_MY_XCODUE_PROJECTUE</string>
 	<key>GADApplicationIdentifier</key>
-	<string>ca-app-pub-4270743783711945~7380581317</string>
+	<string>admob key optional</string>
 	<key>GEMINI_API_KEY</key>
-	<string>AIzaSyAZJSajRAUUtFPqyiss_4wzhBMFNeQQ17A</string>
+	<string>PUT_UR_GEMINI_API_KEY_IN_MY_XCODUE_PROJECTUE</string>
 	<key>GIDClientID</key>
 	<string>788392598546-6i303g4r1o6mrf8egoak1889e4cbft9t.apps.googleusercontent.com</string>
 	<key>MISTRAL_API_KEY</key>
-	<string>SDEFryowdW0OK4dw2CV5dPwvMNYbWLP9</string>
+	<string>PUT_UR_MISTRAL_API_KEY_IN_MY_XCODUE_PROJECTUE</string>
 </dict>
 </plist>
