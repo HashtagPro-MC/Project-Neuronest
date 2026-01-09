@@ -7,10 +7,12 @@ final class SurveyViewModel: ObservableObject {
     @Published var resultText: String = ""
     @Published var isLoading: Bool = false
     @Published var errorMessage: String? = nil
+    @Published var cheerMessage: String = ""
 
     func analyze() async {
         errorMessage = nil
         resultText = ""
+        cheerMessage = ""
 
         let trimmed = chatText.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else {
@@ -38,8 +40,23 @@ final class SurveyViewModel: ObservableObject {
                 model: "command-r-plus",
                 temperature: 0.2
             )
+            await generateCheerMessage()
         } catch {
             errorMessage = error.localizedDescription
+        }
+    }
+
+    @MainActor
+    private func generateCheerMessage() async {
+        do {
+            let client = try MistralClient(model: "mistral-small-latest")
+            let prompt = """
+            Write one short, cheerful sentence to encourage the user after completing their weekly check-in survey.
+            Keep it positive, supportive, and friendly. No medical advice.
+            """
+            cheerMessage = try await client.chat(system: nil, user: prompt)
+        } catch {
+            cheerMessage = "정말 잘했어! 이번 주도 힘내자 💪"
         }
     }
 

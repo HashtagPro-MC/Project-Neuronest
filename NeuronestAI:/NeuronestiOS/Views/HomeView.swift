@@ -140,6 +140,10 @@ struct HomeView: View {
             tile(emoji: "🛰️", title: "ESP32 BLE", subtitle: "Live device data") {
                 BLESerialView()
             }
+
+            tile(emoji: "📝", title: "Weekly Survey", subtitle: "Check-in & feedback") {
+                SurveyView()
+            }
         }
     }
 

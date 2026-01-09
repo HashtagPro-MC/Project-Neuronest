@@ -64,4 +64,37 @@ final class NotificationManager: ObservableObject {
     func cancelDailyReminder(identifier: String = "neuronest.daily.reminder") {
         center.removePendingNotificationRequests(withIdentifiers: [identifier])
     }
+
+    /// 매주 특정 요일/시간 반복 알림 (1=일요일, 7=토요일)
+    func scheduleWeeklyReminder(
+        weekday: Int,
+        hour: Int,
+        minute: Int,
+        title: String,
+        body: String,
+        identifier: String = "neuronest.weekly.survey"
+    ) async throws {
+        let content = UNMutableNotificationContent()
+        content.title = title
+        content.body = body
+        content.sound = .default
+
+        var dateMatching = DateComponents()
+        dateMatching.weekday = weekday
+        dateMatching.hour = hour
+        dateMatching.minute = minute
+
+        let trigger = UNCalendarNotificationTrigger(dateMatching: dateMatching, repeats: true)
+        let request = UNNotificationRequest(identifier: identifier, content: content, trigger: trigger)
+
+        do {
+            try await center.add(request)
+        } catch {
+            throw NotiError.scheduleFailed(error.localizedDescription)
+        }
+    }
+
+    func cancelWeeklyReminder(identifier: String = "neuronest.weekly.survey") {
+        center.removePendingNotificationRequests(withIdentifiers: [identifier])
+    }
 }
