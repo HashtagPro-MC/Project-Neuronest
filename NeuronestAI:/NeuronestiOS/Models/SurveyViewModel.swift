@@ -14,11 +14,11 @@ final class SurveyViewModel: ObservableObject {
     }
 
     let questions: [SurveyQuestion] = [
-        .init(title: "이번 주 기분은 어땠나요?", options: ["😄 아주 좋아요", "🙂 괜찮아요", "😐 보통이에요", "🙁 조금 힘들었어요"]),
-        .init(title: "수면은 충분했나요?", options: ["🛌 아주 잘 잤어요", "🙂 괜찮았어요", "😐 보통이에요", "😴 부족했어요"]),
-        .init(title: "집중이 잘 됐나요?", options: ["🔥 매우 잘 됐어요", "🙂 괜찮았어요", "😐 보통이에요", "🌧️ 어려웠어요"]),
-        .init(title: "기억력 게임/훈련을 얼마나 했나요?", options: ["✅ 4회 이상", "✅ 2~3회", "✅ 1회", "❌ 못했어요"]),
-        .init(title: "이번 주에 가장 하고 싶은 변화는?", options: ["🚶 산책/활동 늘리기", "🍎 식단 챙기기", "🧠 훈련 꾸준히", "😴 휴식 늘리기"])
+        .init(title: "How was your mood this week?", options: ["😄 Very good", "🙂 Pretty good", "😐 Okay", "🙁 A bit tough"]),
+        .init(title: "Did you get enough sleep?", options: ["🛌 Slept very well", "🙂 Pretty well", "😐 Okay", "😴 Not enough"]),
+        .init(title: "Were you able to focus?", options: ["🔥 Very well", "🙂 Pretty well", "😐 Okay", "🌧️ It was hard"]),
+        .init(title: "How often did you do memory training/games?", options: ["✅ 4+ times", "✅ 2–3 times", "✅ 1 time", "❌ Not at all"]),
+        .init(title: "What change would you like most this week?", options: ["🚶 More walking/activity", "🍎 Better meals", "🧠 Keep training", "😴 More rest"])
     ]
 
     @Published var answers: [UUID: String] = [:]
