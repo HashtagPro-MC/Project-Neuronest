@@ -3,47 +3,47 @@ import Combine
 
 @MainActor
 final class SurveyViewModel: ObservableObject {
-    @Published var chatText: String = ""
-    @Published var resultText: String = ""
     @Published var isLoading: Bool = false
     @Published var errorMessage: String? = nil
     @Published var cheerMessage: String = ""
 
-    func analyze() async {
+    struct SurveyQuestion: Identifiable {
+        let id = UUID()
+        let title: String
+        let options: [String]
+    }
+
+    let questions: [SurveyQuestion] = [
+        .init(title: "이번 주 기분은 어땠나요?", options: ["😄 아주 좋아요", "🙂 괜찮아요", "😐 보통이에요", "🙁 조금 힘들었어요"]),
+        .init(title: "수면은 충분했나요?", options: ["🛌 아주 잘 잤어요", "🙂 괜찮았어요", "😐 보통이에요", "😴 부족했어요"]),
+        .init(title: "집중이 잘 됐나요?", options: ["🔥 매우 잘 됐어요", "🙂 괜찮았어요", "😐 보통이에요", "🌧️ 어려웠어요"]),
+        .init(title: "기억력 게임/훈련을 얼마나 했나요?", options: ["✅ 4회 이상", "✅ 2~3회", "✅ 1회", "❌ 못했어요"]),
+        .init(title: "이번 주에 가장 하고 싶은 변화는?", options: ["🚶 산책/활동 늘리기", "🍎 식단 챙기기", "🧠 훈련 꾸준히", "😴 휴식 늘리기"])
+    ]
+
+    @Published var answers: [UUID: String] = [:]
+
+    func setAnswer(questionID: UUID, option: String) {
+        answers[questionID] = option
+    }
+
+    var isComplete: Bool {
+        answers.keys.count == questions.count
+    }
+
+    func submit() async {
         errorMessage = nil
-        resultText = ""
         cheerMessage = ""
 
-        let trimmed = chatText.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmed.isEmpty else {
-            errorMessage = "분석할 채팅을 붙여넣어줘."
+        guard isComplete else {
+            errorMessage = "모든 질문에 답해줘."
             return
         }
 
         isLoading = true
         defer { isLoading = false }
 
-        do {
-            let client = try CohereClient()
-
-            let system = """
-            You are Neuronest AI research assistant.
-            Analyze chats to extract structured insights. Do not include medical or legal advice.
-            Keep outputs clear and concise.
-            """
-
-            let user = buildPrompt(chat: trimmed)
-
-            resultText = try await client.chat(
-                system: system,
-                user: user,
-                model: "command-r-plus",
-                temperature: 0.2
-            )
-            await generateCheerMessage()
-        } catch {
-            errorMessage = error.localizedDescription
-        }
+        await generateCheerMessage()
     }
 
     @MainActor
@@ -58,25 +58,5 @@ final class SurveyViewModel: ObservableObject {
         } catch {
             cheerMessage = "정말 잘했어! 이번 주도 힘내자 💪"
         }
-    }
-
-    private func buildPrompt(chat: String) -> String {
-        """
-        Analyze the following chat log and produce a structured survey-style report.
-
-        Output format:
-        1) Summary (3 bullets)
-        2) Detected Topics (up to 8, include short evidence quotes <= 12 words)
-        3) User Goals & Intent (ranked)
-        4) Pain Points / Frictions (ranked)
-        5) Emotion & Tone (short)
-        6) Suggested Next Actions (5 items)
-        7) 5 Survey Questions to ask next (multiple-choice)
-
-        Chat:
-        ---
-        \(chat)
-        ---
-        """
     }
 }
