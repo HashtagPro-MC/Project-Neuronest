@@ -136,6 +136,10 @@ struct HomeView: View {
             tile(emoji: "🔢", title: "Number Memory", subtitle: "Digit span") {
                 NumberMemoryView()
             }
+
+            tile(emoji: "🛰️", title: "ESP32 BLE", subtitle: "Live device data") {
+                BLESerialView()
+            }
         }
     }
 

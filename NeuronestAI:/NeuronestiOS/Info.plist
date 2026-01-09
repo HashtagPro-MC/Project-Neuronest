@@ -27,5 +27,9 @@
 	<string>788392598546-6i303g4r1o6mrf8egoak1889e4cbft9t.apps.googleusercontent.com</string>
 	<key>MISTRAL_API_KEY</key>
 	<string>PUT_UR_MISTRAL_API_KEY_IN_MY_XCODUE_PROJECTUE</string>
+	<key>NSBluetoothAlwaysUsageDescription</key>
+	<string>ESP32 BLE 데이터를 받기 위해 블루투스가 필요해요.</string>
+	<key>NSBluetoothPeripheralUsageDescription</key>
+	<string>ESP32 BLE 장치와 통신하기 위해 블루투스를 사용합니다.</string>
 </dict>
 </plist>
