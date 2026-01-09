@@ -4,32 +4,35 @@ import Combine
 
 @MainActor
 final class BLESerialManager: NSObject, ObservableObject {
+    // MARK: - Published
     @Published var status: String = "Idle"
     @Published var isConnected: Bool = false
     @Published var log: String = ""
     @Published var isScanning: Bool = false
 
+    // MARK: - CoreBluetooth
     private var central: CBCentralManager!
     private var peripheral: CBPeripheral?
 
-    // 너가 준 Service UUID
+    // Your Service UUID
     private let serviceUUID = CBUUID(string: "6F1A9B40-8C4E-4E48-9B2C-5D5D3B6F0A10")
-    
-    
-    //6F1A9B40-8C4E-4E48-9B2C-5D5D3B6F0A10
-    //6F1A9B40-8C4E-4D48-9B2C-5D5D3B6F0A10
 
-    // 우리가 “자동으로” 찾아 잡을 값
+    // Chars discovered
     private var notifyChar: CBCharacteristic?
     private var writeChar: CBCharacteristic?
 
-    // newline 파싱용(ESP가 \n으로 보내면 편함)
+    // Buffer (optional line parsing)
     private var buffer = Data()
+
+    // Optional: match by device name (edit to your ESP32 local name)
+    private let preferredNameKeywords: [String] = ["ESP32", "Neuronest"]
 
     override init() {
         super.init()
         central = CBCentralManager(delegate: self, queue: .main)
     }
+
+    // MARK: - Public API
 
     func startScan() {
         guard central.state == .poweredOn else {
@@ -39,45 +42,61 @@ final class BLESerialManager: NSObject, ObservableObject {
         isScanning = true
         status = "Scanning..."
         log = ""
-        central.scanForPeripherals(withServices: [serviceUUID], options: [
+        notifyChar = nil
+        writeChar = nil
+        buffer.removeAll(keepingCapacity: true)
+
+        // ✅ IMPORTANT FIX:
+        // Scan for ALL peripherals (nil). Some ESP32 setups do NOT advertise the service UUID.
+        central.scanForPeripherals(withServices: nil, options: [
             CBCentralManagerScanOptionAllowDuplicatesKey: false
         ])
     }
 
     func disconnect() {
-        if let p = peripheral { central.cancelPeripheralConnection(p) }
+        if let p = peripheral {
+            central.cancelPeripheralConnection(p)
+        }
         isScanning = false
     }
 
-    /// (선택) 폰 -> ESP로 보내기
+    /// Phone -> ESP write (optional)
     func send(_ text: String) {
         guard let p = peripheral, let w = writeChar else {
             append("⚠️ No write characteristic")
             return
         }
         let data = Data(text.utf8)
-        // 대부분 .withResponse 또는 .withoutResponse 중 하나만 가능
+
+        // Choose write type based on supported properties
         let type: CBCharacteristicWriteType = w.properties.contains(.write) ? .withResponse : .withoutResponse
         p.writeValue(data, for: w, type: type)
-        append("➡️ \(text)")
+        append("➡️ \(text.trimmingCharacters(in: .newlines))")
     }
+
+    // MARK: - Logging
 
     private func append(_ line: String) {
         log += (log.isEmpty ? "" : "\n") + line
     }
 
+    // ✅ IMPORTANT FIX:
+    // Print incoming data immediately (even if no newline)
     private func handleIncoming(_ data: Data) {
-        buffer.append(data)
+        if let s = String(data: data, encoding: .utf8) {
+            append("⬅️ \(s)")
+        } else {
+            append("⬅️ (binary \(data.count) bytes)")
+        }
 
-        // newline(\n) 기준으로 줄 단위 처리
+        // Optional: keep newline parsing too (useful if ESP sends \n)
+        buffer.append(data)
         while let range = buffer.firstRange(of: Data([0x0A])) { // \n
             let lineData = buffer.subdata(in: buffer.startIndex..<range.startIndex)
             buffer.removeSubrange(buffer.startIndex..<range.endIndex)
 
             if let line = String(data: lineData, encoding: .utf8) {
-                append("⬅️ \(line)")
-            } else {
-                append("⬅️ (binary \(lineData.count) bytes)")
+                append("⬅️ [line] \(line)")
             }
         }
     }
@@ -85,18 +104,33 @@ final class BLESerialManager: NSObject, ObservableObject {
 
 // MARK: - CBCentralManagerDelegate, CBPeripheralDelegate
 extension BLESerialManager: CBCentralManagerDelegate, CBPeripheralDelegate {
+
     func centralManagerDidUpdateState(_ central: CBCentralManager) {
         status = (central.state == .poweredOn) ? "Bluetooth ready" : "Bluetooth not available"
+        if central.state != .poweredOn {
+            isScanning = false
+        }
     }
 
     func centralManager(_ central: CBCentralManager,
                         didDiscover peripheral: CBPeripheral,
                         advertisementData: [String : Any],
                         rssi RSSI: NSNumber) {
-        // 첫 발견 즉시 연결
+
+        // Names can be in peripheral.name or advertisement local name
+        let advName = advertisementData[CBAdvertisementDataLocalNameKey] as? String
+        let name = peripheral.name ?? advName ?? "Unknown"
+        append("👀 Found: \(name) RSSI:\(RSSI)")
+
+        // ✅ Filter to your device to avoid connecting to random BLE stuff
+        let matches = preferredNameKeywords.contains(where: { name.localizedCaseInsensitiveContains($0) })
+        guard matches else { return }
+
+        // Connect immediately
         self.peripheral = peripheral
         status = "Connecting..."
         central.stopScan()
+        isScanning = false
         central.connect(peripheral, options: nil)
     }
 
@@ -105,13 +139,16 @@ extension BLESerialManager: CBCentralManagerDelegate, CBPeripheralDelegate {
         isConnected = true
         status = "Connected. Discovering services..."
         peripheral.delegate = self
-        peripheral.discoverServices([serviceUUID])
+
+        // We can discover all services, then filter
+        peripheral.discoverServices(nil)
     }
 
     func centralManager(_ central: CBCentralManager,
                         didFailToConnect peripheral: CBPeripheral,
                         error: Error?) {
         isConnected = false
+        isScanning = false
         status = "Connect failed: \(error?.localizedDescription ?? "unknown")"
     }
 
@@ -121,41 +158,68 @@ extension BLESerialManager: CBCentralManagerDelegate, CBPeripheralDelegate {
         isConnected = false
         notifyChar = nil
         writeChar = nil
+        self.peripheral = nil
+        isScanning = false
         status = "Disconnected"
+        if let error {
+            append("⚠️ Disconnected error: \(error.localizedDescription)")
+        }
     }
 
     func peripheral(_ peripheral: CBPeripheral, didDiscoverServices error: Error?) {
-        if let error { status = "Service error: \(error.localizedDescription)"; return }
-        guard let services = peripheral.services else { return }
-
-        for s in services where s.uuid == serviceUUID {
-            status = "Discovering characteristics..."
-            peripheral.discoverCharacteristics(nil, for: s) // nil = 전부 찾기
+        if let error {
+            status = "Service error: \(error.localizedDescription)"
             return
         }
-        status = "Service not found"
+        guard let services = peripheral.services else {
+            status = "No services"
+            return
+        }
+
+        // Find your service, otherwise still allow discovering chars on all services (debug)
+        if let target = services.first(where: { $0.uuid == serviceUUID }) {
+            status = "Discovering characteristics..."
+            peripheral.discoverCharacteristics(nil, for: target)
+        } else {
+            status = "Service not found (debug: listing all services)"
+            for s in services {
+                append("🧩 Service: \(s.uuid.uuidString)")
+                peripheral.discoverCharacteristics(nil, for: s)
+            }
+        }
     }
 
     func peripheral(_ peripheral: CBPeripheral,
                     didDiscoverCharacteristicsFor service: CBService,
                     error: Error?) {
-        if let error { status = "Char error: \(error.localizedDescription)"; return }
+        if let error {
+            status = "Char error: \(error.localizedDescription)"
+            return
+        }
         guard let chars = service.characteristics else { return }
 
-        // ⭐ 핵심: notify 가능한 char를 찾아서 구독
+        append("🧷 Chars for service \(service.uuid.uuidString):")
         for c in chars {
-            if c.properties.contains(.notify) || c.properties.contains(.indicate) {
+            append("   • \(c.uuid.uuidString) props=\(c.properties)")
+        }
+
+        // Pick notify + write chars
+        for c in chars {
+            if notifyChar == nil, (c.properties.contains(.notify) || c.properties.contains(.indicate)) {
                 notifyChar = c
                 peripheral.setNotifyValue(true, for: c)
-                status = "Subscribed (notify) ✅"
+                status = "Subscribing (notify)..."
             }
-            if c.properties.contains(.write) || c.properties.contains(.writeWithoutResponse) {
+            if writeChar == nil, (c.properties.contains(.write) || c.properties.contains(.writeWithoutResponse)) {
                 writeChar = c
             }
         }
 
         if notifyChar == nil {
             status = "No notify characteristic found ❌"
+        } else if writeChar == nil {
+            // It's okay if you only need receive
+            append("ℹ️ No write characteristic (receive-only)")
         }
     }
 
@@ -167,6 +231,7 @@ extension BLESerialManager: CBCentralManagerDelegate, CBPeripheralDelegate {
             return
         }
         append("🔔 Notify ON for \(characteristic.uuid.uuidString)")
+        status = "Subscribed (notify) ✅"
     }
 
     func peripheral(_ peripheral: CBPeripheral,
