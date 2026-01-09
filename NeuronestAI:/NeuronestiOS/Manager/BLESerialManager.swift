@@ -87,6 +87,9 @@ final class BLESerialManager: NSObject, ObservableObject {
 extension BLESerialManager: CBCentralManagerDelegate, CBPeripheralDelegate {
     func centralManagerDidUpdateState(_ central: CBCentralManager) {
         status = (central.state == .poweredOn) ? "Bluetooth ready" : "Bluetooth not available"
+        if central.state != .poweredOn {
+            isScanning = false
+        }
     }
 
     func centralManager(_ central: CBCentralManager,
@@ -97,6 +100,7 @@ extension BLESerialManager: CBCentralManagerDelegate, CBPeripheralDelegate {
         self.peripheral = peripheral
         status = "Connecting..."
         central.stopScan()
+        isScanning = false
         central.connect(peripheral, options: nil)
     }
 
@@ -112,6 +116,7 @@ extension BLESerialManager: CBCentralManagerDelegate, CBPeripheralDelegate {
                         didFailToConnect peripheral: CBPeripheral,
                         error: Error?) {
         isConnected = false
+        isScanning = false
         status = "Connect failed: \(error?.localizedDescription ?? "unknown")"
     }
 
@@ -121,6 +126,7 @@ extension BLESerialManager: CBCentralManagerDelegate, CBPeripheralDelegate {
         isConnected = false
         notifyChar = nil
         writeChar = nil
+        isScanning = false
         status = "Disconnected"
     }
 
