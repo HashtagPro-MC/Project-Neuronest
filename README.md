@@ -1,15 +1,29 @@
-# Project-Neuronest
-The helping care for the elderly which will be on play store, )Prooooobably(
+# Project Neuronest
 
-Also im 12 yr old so give me some improvments!
-mail:rainbowujs@outlook.com submail:heydrdr@outlook.com
+Neuronest is a mobile app focused on helping older adults with cognitive training, daily routines, and supportive AI tools.
 
-<img width="686" height="272" alt="image" src="https://github.com/user-attachments/assets/a806e1e1-6123-46af-a242-14787a05ebe4" />
-My sick image 😎
+## Highlights
+- Cognitive training games (memory, focus, reaction)
+- AI-assisted summaries and coaching
+- Calendar-based planning and reminders
+- Diet planning and habit support
+- Chat and analysis tools
 
-Logo <img width="606" height="413" alt="스크린샷 2025-11-20 234111" src="https://github.com/user-attachments/assets/4ebbb0e8-a878-46d6-9eab-d3d4265a8b70" />
+## Project Structure
+- `NeuronestAI:/NeuronestiOS` — iOS SwiftUI app
+- `NeuronestiOS_.xcodeproj` — Xcode project file
 
+## Screenshots
+![App preview](https://github.com/user-attachments/assets/a806e1e1-6123-46af-a242-14787a05ebe4)
 
+![Logo](https://github.com/user-attachments/assets/4ebbb0e8-a878-46d6-9eab-d3d4265a8b70)
 
+## Community
+- Discord: https://discord.gg/nbZBCArAWn
 
-Discord server 🥸:(if u wanna join or give some comments and improments😎👍) [https://discord.gg/nbZBCArAWn](url)
+## Contact
+- Email: rainbowujs@outlook.com
+- Backup: heydrdr@outlook.com
+
+## Notes
+- This repo is under active development. Feedback and improvements are welcome.
