@@ -1,7 +1,7 @@
 # 🧠 Neuronest
 
 <p align="center">
-    <img src="logo.png" alt="Neuronest Logo" width="340">
+    <img width="579" height="379" alt="image" src="https://github.com/user-attachments/assets/c42b0233-d0d4-4c7c-9533-7ebbdd46bfde" />
 </p>
 
 <p align="center">
