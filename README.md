@@ -1,4 +1,4 @@
-# 🧠 Neuronest
+############################# 🧠 Neuronest
 
 <p align="center">
     <img width="579" height="379" alt="image" src="https://github.com/user-attachments/assets/c42b0233-d0d4-4c7c-9533-7ebbdd46bfde" />
@@ -14,7 +14,7 @@ Wearable hardware meets real-time intelligence.
   <a href="#architecture">Architecture</a> |
   <a href="#roadmap">Roadmap</a> |
   <a href="https://github.com/YOURUSERNAME/Neuronest/issues">Report Issue</a> |
-  <a href="https://discord.gg/YOURDISCORD">Join Discord</a>
+  <a href="https://discord.gg/nbZBCArAWn">Join Discord</a>
 </p>
 
 <p align="center">
