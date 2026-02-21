@@ -18,9 +18,9 @@ Wearable hardware meets real-time intelligence.
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/github/stars/YOURUSERNAME/Neuronest?style=for-the-badge">
-  <img src="https://img.shields.io/github/forks/YOURUSERNAME/Neuronest?style=for-the-badge">
-  <img src="https://img.shields.io/github/license/YOURUSERNAME/Neuronest?style=for-the-badge">
+  <img src="https://img.shields.io/github/stars/HashtagPro-MC/Neuronest?style=for-the-badge">
+  <img src="https://img.shields.io/github/forks/HashtagPro-MC/Neuronest?style=for-the-badge">
+  <img src="https://img.shields.io/github/license/HashtagPro-MC/Neuronest?style=for-the-badge">
 </p>
 
 ---
