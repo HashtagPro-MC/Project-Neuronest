@@ -154,6 +154,12 @@ User Feedback (UI + Motor)
 
 ---
 
+## 📘 Implementation Guide (Korean)
+- [집중/산만 판별 + 코인 모터 + 앱 알림 구현 가이드](docs/focus-distract-implementation-guide-ko.md)
+- [ESP32 집중/산만 판별 + 모터 + BLE 코드](firmware/FocusDistractESP32/FocusDistractESP32.ino)
+
+---
+
 # 🛠 Installation
 
 ## iOS App
